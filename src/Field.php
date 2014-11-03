@@ -1,5 +1,6 @@
 <?php
 namespace samson\cms\input;
+use samson\activerecord\dbRelation;
 
 /**
  * Generic SamsonCMS input field
@@ -122,8 +123,7 @@ class Field extends \samson\core\CompressableExternalModule implements \samson\c
 	 */
 	public function __save()
 	{
-        elapsed('sdfsd');
-		// Does it nessessar?
+		// Does it necessary?
 		s()->async(true);	
 
 		// If we have post data
@@ -144,6 +144,32 @@ class Field extends \samson\core\CompressableExternalModule implements \samson\c
 			// Try to find passed object for saving
 			if( dbQuery( $entity )->id( $id )->first( $obj ) )
 			{
+                // If our object is material field
+                if ($obj instanceof \samson\activerecord\materialfield) {
+                    // Get current material
+                    $material = dbQuery('material')->id($obj->MaterialID)->first();
+                    // If material can have related materials
+                    if ($material->type == 1 && $material->parent_id == 0) {
+                        // Get related materials identifiers
+                        $children = dbQuery('material')->cond('parent_id', $material->id)->fields('MaterialID');
+
+                        // For each child create or update material field record
+                        foreach ($children as $child) {
+                            if (!dbQuery('materialfield')->cond('FieldID', $obj->FieldID)->cond('locale', $obj->locale)->cond('MaterialID', $child)->first($child_mf)) {
+                                $child_mf = new \samson\activerecord\materialfield(false);
+                                $child_mf->MaterialID = $child;
+                                $child_mf->FieldID = $obj->FieldID;
+                                $child_mf->locale = $obj->locale;
+                                $child_mf->Active = 1;
+                            }
+                            $child_mf->Value = $value;
+                            if (isset($obj->numeric_value)) {
+                                $child_mf->numeric_value = $value;
+                            }
+                            $child_mf->save();
+                        }
+                    }
+                }
 				// Set field value
 				$obj[ $param ] = $value;
 
