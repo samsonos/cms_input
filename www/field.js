@@ -42,6 +42,7 @@ var SamsonCMS_InputField = function( fields, saveHandler )
                 tb.css( 'z-index', 99);
                 tb.css( 'line-height', p.height()+'px');
                 tb.css( 'padding-left', '5px');
+                tb.css( 'font-size', '1.6em');
                 tb.show();
                 tb.focus();
 
