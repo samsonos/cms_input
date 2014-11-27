@@ -170,7 +170,15 @@ class Field extends \samson\core\CompressableExternalModule implements \samson\c
                         }
                     }
                 }
-				// Set field value
+                if ($obj instanceof \samson\activerecord\material && $param = 'remains') {
+                    /** @var \samson\activerecord\material $parent */
+                    $parent = null;
+                    if (dbQuery('material')->cond('MaterialID', $obj->parent_id)->first($parent)) {
+                        $parent->remains = $parent->remains - $obj->remains + intval($value);
+                        $parent->save();
+                    }
+                }
+                // Set field value
 				$obj[ $param ] = $value;
 
                 // If object supports numeric value
