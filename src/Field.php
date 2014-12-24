@@ -233,14 +233,15 @@ class Field extends \samson\core\CompressableExternalModule implements \samson\c
 		$result[ $inner_prefix.'textarea_id' ] = 'field_'.$this->obj->id;
 		
 		// Render inner field view
-		$result[ $inner_prefix.'view' ] = $this->set($result)->output( $this->field_view );
+		$result[ $inner_prefix.'view' ] = $this->view($this->field_view)->set($result)->output();
 				
 		// Return input fields collection prepared for module view
 		return array( 
 			$prefix.'html' => $this
+                ->view($this->default_view)
 				->set( $result )
 				->object($this->obj)
-			->output( $this->default_view )
+			->output()
 		);		
 	}	
 }
