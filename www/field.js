@@ -34,7 +34,7 @@ var SamsonCMS_InputField = function( fields, saveHandler )
             if( tb.a('type') != 'file')
             {
                 // Position and sizing
-                tb.css('position','fixed');
+                tb.css('position','absolute');
                 tb.left( of.left + 1);
                 tb.top( of.top + 1 );
                 tb.css( 'width',p.width()+'px');
@@ -44,6 +44,8 @@ var SamsonCMS_InputField = function( fields, saveHandler )
                 tb.css( 'padding-left', '5px');
                 tb.css( 'font-size', '1.6em');
                 tb.css( 'font-style', 'normal');
+                tb.css( 'left', '-10px');
+                tb.css( 'top', tb.val().length ? '-5px' : '-6px');
                 tb.show();
                 tb.focus();
 
