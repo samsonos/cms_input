@@ -86,6 +86,14 @@ var SamsonCMS_InputField = function( fields, saveHandler )
             // Bind click event
             field.click( o.clickToEdit, false, true );
 
+            field.keydown(function(elem, q, e){
+                if (e.keyCode == 13) {
+                    s('.__input', field).blur();
+                    e.preventDefault();
+                    return false;
+                }
+            });
+
 			// Save handler
 			s('.__input', field ).blur( function(tb)
 			{
