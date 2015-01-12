@@ -72,7 +72,7 @@ var SamsonCMS_InputField = function( fields, saveHandler )
 		fields.each(function( field )
 		{
 			// Create ajax loader object
-			var loader = new Loader( field.parent() );
+			var loader = new Loader( field.parent(), {type: 'absolute', top: 1, left: 1} );
 
 			// Current value view
 			var sp = s( 'span', field );
