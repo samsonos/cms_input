@@ -170,7 +170,7 @@ class Field extends \samson\core\CompressableExternalModule implements \samson\c
                         }
                     }
                 }
-                if ($obj instanceof \samson\activerecord\material && $param = 'remains') {
+                if ($obj instanceof \samson\activerecord\material && $param == 'remains') {
                     /** @var \samson\activerecord\material $parent */
                     $parent = null;
                     if (dbQuery('material')->cond('MaterialID', $obj->parent_id)->first($parent)) {
