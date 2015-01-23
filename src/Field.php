@@ -186,7 +186,10 @@ class Field extends \samson\core\CompressableExternalModule implements \samson\c
                     // Convert value to numeric value
                     $obj['numeric_value'] = $this->numericValue($value);
                 }
-
+				
+				// Create new event on object updating
+				Event::fire('samson.cms.input.change', array(& $obj));
+				
 				// Save object
 				$obj->save();
 			}
