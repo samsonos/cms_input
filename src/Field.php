@@ -29,7 +29,7 @@ class Field extends \samson\core\CompressableExternalModule implements \samson\c
 	 * @var \samson\activerecord\dbRecord
 	 * @see \samson\activerecord\dbRecord 
 	 */
-	protected $obj;
+	public $obj;
 	
 	/** Path to view file for field rendering */
 	protected $default_view = "index";
@@ -178,20 +178,18 @@ class Field extends \samson\core\CompressableExternalModule implements \samson\c
                         $parent->save();
                     }
                 }
-                // Set field value
-				$obj[ $param ] = $value;
 
                 // If object supports numeric value
                 if ($param != 'numeric_value' && isset($obj['numeric_value'])) {
                     // Convert value to numeric value
                     $obj['numeric_value'] = $this->numericValue($value);
                 }
-				
-				// Create new event on object updating
-				Event::fire('samson.cms.input.change', array(& $obj));
-				
-				// Save object
-				$obj->save();
+
+                // Set field value and than save it
+                $this->obj = $obj;
+                $this->param = $param;
+                $this->save($value);
+
 			}
 			else e('CMSField - Entity ## with id: ## - does not exists', E_SAMSON_CORE_ERROR, array( $entity, $identifier) ); 
 		}	
@@ -207,7 +205,10 @@ class Field extends \samson\core\CompressableExternalModule implements \samson\c
 	{		
 		// Set field value
 		$this->obj[ $this->param ] = $value;
-		
+
+        // Create new event on object updating
+        \samsonphp\event\Event::fire('samson.cms.input.change', array(& $this->obj));
+
 		// Save object
 		$this->obj->save();
 	}		
