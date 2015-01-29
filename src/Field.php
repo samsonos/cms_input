@@ -29,7 +29,7 @@ class Field extends \samson\core\CompressableExternalModule implements \samson\c
 	 * @var \samson\activerecord\dbRecord
 	 * @see \samson\activerecord\dbRecord 
 	 */
-	public $obj;
+	protected $obj;
 	
 	/** Path to view file for field rendering */
 	protected $default_view = "index";
