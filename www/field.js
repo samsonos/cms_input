@@ -40,13 +40,13 @@ var SamsonCMS_InputField = function( fields, saveHandler )
                 tb.css( 'width',p.width()+'px');
                 tb.css( 'height', p.height()+'px');
                 tb.css( 'z-index', 99);
-                tb.css( 'line-height', p.height()+'px');
                 tb.css( 'padding-left', '5px');
                 tb.css( 'font-size', '1.6em');
                 tb.css( 'font-style', 'normal');
                 tb.css( 'left', '-10px');
                 tb.css( 'top', tb.val().length ? '-5px' : '-6px');
                 tb.show();
+                tb.css( 'line-height', p.height()+'px');
                 tb.focus();
 
                 // Fix to put pointer at the end
