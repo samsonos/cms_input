@@ -51,6 +51,8 @@ class Field extends \samson\core\CompressableExternalModule implements \samson\c
     {
         /** @var \samsoncms\input\Field $cmsField This class or it's ancestor entity */
         $cmsField = null;
+        /** @var \samson\core\ExternalModule $module Variable to store Field or it's ancestor module */
+        $module = null;
 
         // TODO: Double nested classes not supported, we need to build class tree
 
@@ -153,7 +155,7 @@ class Field extends \samson\core\CompressableExternalModule implements \samson\c
      * Create instance from object
      * @param mixed 	$obj 	Object for creating inputfield
      * @param string 	$param	Object field name
-     * @return \samsoncms\input\InputField Class instance
+     * @return \samsoncms\input\Field Class instance
      */
     public static function & fromObject(& $obj, $param = 'Value', $classname = __CLASS__)
     {
@@ -192,9 +194,14 @@ class Field extends \samson\core\CompressableExternalModule implements \samson\c
 //        return $o;
     }
 
+    /**
+     * Function to retrieve CMS Field value
+     *
+     * @return mixed CMS Field value
+     */
     public function value()
     {
-        return $this->obj[$this->param];
+        return $this->value;
     }
 
     /**
@@ -208,8 +215,7 @@ class Field extends \samson\core\CompressableExternalModule implements \samson\c
     // Controller
 
     /**
-     * Save input field value
-     * @param mixed $value Field value
+     * Save handler for CMS Field input
      */
     public function __save()
     {
