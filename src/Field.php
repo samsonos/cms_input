@@ -11,6 +11,7 @@ class Field extends \samson\core\CompressableExternalModule implements \samson\c
     /** @var  int Field type identifier */
     protected static $type;
 
+    /** {@inheritdoc} */
     protected $id = 'samson_cms_input_field';
 
     /** Database object class name which connected  with this field */
@@ -259,8 +260,8 @@ class Field extends \samson\core\CompressableExternalModule implements \samson\c
             // Make pointers to posted parameters
             $entity = & $_POST['__entity'];
             $param 	= & $_POST['__param'];
-            $objectId 	= & $_POST['__obj_id'];
-            $value 	= & $_POST['__value'];
+            $objectId = & $_POST['__obj_id'];
+            $value = & $_POST['__value'];
 
             // Check if all nessesarly data is passed
             if (!isset($value)) {
@@ -281,7 +282,7 @@ class Field extends \samson\core\CompressableExternalModule implements \samson\c
                 // If object supports numeric value
                 if ($param != 'numeric_value' && isset($dbObject['numeric_value'])) {
                     // Convert value to numeric value
-                    $dbObject['numeric_value'] = $this->numericValue($value);
+                    $dbObject['numeric_value'] = $this->convert($value);
                 }
 
                 // Set field value and than save it
