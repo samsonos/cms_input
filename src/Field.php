@@ -1,19 +1,17 @@
 <?php
 namespace samsoncms\input;
 
+use samson\activerecord\dbQuery;
+use samson\activerecord\dbRecord;
+use samsonphp\event\Event;
+
 /**
  * Generic SamsonCMS input field
- * @author Vitaly Iegorov<egorov@samsonos.com>
- *
+ * @author Vitaly Iegorov <egorov@samsonos.com>
+ * @author Max Omelchenko <omelchenko@samsonos.com>
  */
-class Field extends \samson\core\CompressableExternalModule implements \samson\core\iModuleViewable
+class Field
 {
-    /** @var  int Field type identifier */
-    protected static $type;
-
-    /** {@inheritdoc} */
-    protected $id = 'samson_cms_input_field';
-
     /** Database object class name which connected  with this field */
     protected $entity;
 
@@ -23,14 +21,14 @@ class Field extends \samson\core\CompressableExternalModule implements \samson\c
     /** Database object current field value */
     protected $value;
 
-    /** Main field action controller */
-    protected $action = 'save';
-
     /** Special CSS classname for nested field objects to bind JS and CSS */
     protected $cssClass = '__textarea';
 
-    /** @var \samson\activerecord\dbRecord Pointer to database object instance */
-    protected $obj;
+    /** @var dbRecord Pointer to database object instance */
+    protected $dbObject;
+
+    /** @var null|dbQuery Pointer to activerecord dbQuery instance */
+    protected $dbQuery = null;
 
     /** Path to view file for field rendering */
     protected $defaultView = "index";
@@ -39,187 +37,40 @@ class Field extends \samson\core\CompressableExternalModule implements \samson\c
     protected $fieldView = "field";
 
     /**
-     * Create field class ancestor
+     * Constructor
      *
-     * @param \samson\activerecord\dbRecord $dbObject Any database object
-     * @param int $type Field type identifier
-     * @param string $param dbObject field
-     * @param string $className Class name for double and more ancestors
-     * @return self Field class ancestor instance
-     */
-    public static function create($dbObject, $type, $param = null, $className = __CLASS__)
-    {
-        /** @var \samsoncms\input\Field $cmsField This class or it's ancestor entity */
-        $cmsField = null;
-        /** @var \samson\core\ExternalModule $module Variable to store Field or it's ancestor module */
-        $module = null;
-
-        // TODO: Double nested classes not supported, we need to build class tree
-
-        // Iterate all child classes
-        foreach (get_child_classes($className) as $child) {
-            // If we have child class with specified type
-            if ($child::$type == $type) {
-                /** @var string $moduleId Module identifier */
-                $moduleId = get_class_vars($child)['id'];
-
-                // If object has not passed
-                if (!is_object($dbObject)) {
-                    // Generate error
-                    e(
-                        'Cannot create ## object instance - no database record object is passed',
-                        E_SAMSON_CORE_ERROR,
-                        __CLASS__
-                    );
-                }
-
-                // Try to get field module instance from core
-                if (null !== ($module = & m($moduleId))) {
-                    // Create input field instance
-                    $cmsField = & $module->copy();
-                    $cmsField->view_path = $module->view_path;
-                    $cmsField->entity = get_class($dbObject);
-                    $cmsField->obj = & $dbObject;
-                    $cmsField->param = isset($param) ? $param : $cmsField->param;
-                    $cmsField->value = $dbObject[$cmsField->param];
-                } else { // Module doesn't exists
-                    // Generate error
-                    e(
-                        'Cannot create ## object instance - Field module ## not loaded to system core',
-                        E_SAMSON_CORE_ERROR,
-                        array(__CLASS__, $child)
-                    );
-                }
-            }
-        }
-        // Return this class or ancestor instance
-        return $cmsField;
-    }
-
-    /**
-     * Create field instance from input data
-     *
-     * @param string $entity class name it should be \samson\activerecord\dbRecord ancestor
-     * @param string $param $entity class field
+     * @param dbQuery $dbQuery Database object
+     * @param string|dbRecord $entity Class name or object
+     * @param string|null $param $entity class field
      * @param int $identifier Identifier to find and create $entity instance
-     * @param string $className Class name for double and more ancestors
-     * @return null|Field If given entity instance exists return Filed object otherwise return null
-     */
-    public static function createFromMetadata($entity, $param, $identifier, $className = __CLASS__)
+     **/
+    public function __construct($dbQuery, $entity, $param = null, $identifier = null)
     {
-        /** @var \samson\activerecord\dbRecord $dbObject Given entity instance */
-        $dbObject = null;
-        /** @var Field $createdField Created field instance */
-        $createdField = null;
+        $this->dbQuery = $dbQuery;
+        $this->param = isset($param) ? $param : $this->param;
 
-        // If we can find given entity instance
-        if (dbQuery($entity)->id($identifier)->first($dbObject)) {
-            // Create Field instance
-            $createdField = self::create($dbObject, self::$type, $param, $className);
+        // Check what has passed in $entity parameter
+        if (!is_object($entity)) {
+            // If it's not object save it as entity
+            $this->entity = $entity;
+            // If identifier was passed try to create object from database object
+            // Otherwise show error
+            if (isset($identifier)) {
+                $this->dbObject = $this->dbQuery->className($entity)->id($identifier)->first();
+            } else {
+                e(
+                    'Cannot create ## object instance - no identifier was passed',
+                    E_SAMSON_CORE_ERROR,
+                    __CLASS__
+                );
+            }
+        } else {
+            $this->dbObject = $entity;
+            $this->entity = get_class($entity);
+            $this->dbQuery->className($this->entity);
         }
 
-        // Return created field
-        return $createdField;
-    }
-
-    /**
-     * Create instance of field from metadata
-     *
-     * @param string $entity
-     * @param string $param
-     * @param string $identifier
-     * @param string $className
-     * @return object
-     */
-    public static function & fromMetadata($entity, $param, $identifier, $className = __CLASS__)
-    {
-        e('Method cms_input_field:fromMetadata() is deprecated', D_SAMSON_DEBUG);
-        $cmsField = null;
-        return $cmsField;
-//        $dbObject = null;
-//
-//        // Correct namespace classname generation
-//        $entity = ns_classname($entity, __NAMESPACE__);
-//        if (!class_exists($entity)) {
-//            e(
-//                'Cannot create ## object instance - Class ## does not exists',
-//                E_SAMSON_CORE_ERROR,
-//                array(__CLASS__, $entity)
-//            );
-//        }
-//
-//        // Generate correct namespace for class
-//        $className = uni_classname(ns_classname(strtolower($className), __NAMESPACE__));
-//
-//        // Try to get field module instance from core
-//        if (null !== ($module = & m($className))) {
-//            // Try to find field corresponding entity
-//            if (dbQuery($entity)->id($identifier)->first($dbObject)) {
-//                // Create field object copy
-//                $cmsField = & $module->copy();
-//                $cmsField->view_path = $module->view_path;
-//                $cmsField->entity = $entity;
-//                $cmsField->obj = & $dbObject;
-//                $cmsField->param = $param;
-//                $cmsField->value = $dbObject[$param];
-//            } else {
-//                e(
-//                    'Cannot create ## object instance - Entity ## with id: ## - does not exists',
-//                    E_SAMSON_CORE_ERROR,
-//                    array(__CLASS__, $entity, $identifier)
-//                );
-//            }
-//        } else {
-//            e(
-//                'Cannot create ## object instance - Field module ## not loaded to system core',
-//                E_SAMSON_CORE_ERROR,
-//                array(__CLASS__,$className)
-//            );
-//        }
-    }
-
-    /**
-     * Create instance from object
-     *
-     * @param mixed 	$obj 	Object for creating inputfield
-     * @param string 	$param	Object field name
-     * @return \samsoncms\input\Field Class instance
-     */
-    public static function & fromObject(& $obj, $param = 'Value', $classname = __CLASS__)
-    {
-        e('Method cms_input_field:fromObject() is deprecated', D_SAMSON_DEBUG);
-        $temp = null;
-        return $temp;
-
-//
-//
-//        // If object is passed
-//        if (!is_object($obj)) {
-//            e('Cannot create ## object instance - no object is passed', E_SAMSON_CORE_ERROR, __CLASS__);
-//        }
-//
-//        // Generate correct namespace for class
-//        $classname = \samson\core\AutoLoader::oldClassName(__NAMESPACE__.'\\'.$classname);
-//
-//        // Try to get field module instance from core
-//        if (null !== ($f = & m($classname))) {
-//            // Create input field instance
-//            $o = & $f->copy();
-//            $o->view_path = $f->view_path;
-//            $o->entity	= get_class($obj);
-//            $o->obj 	= & $obj;
-//            $o->param 	= $param;
-//            $o->value 	= $obj[$param];
-////            trace($o->value, true);
-//        } else {
-//            e(
-//                'Cannot create ## object instance - Field module ## not loaded to system core',
-//                E_SAMSON_CORE_ERROR,
-//                array(__CLASS__,$classname)
-//            );
-//        }
-//
-//        return $o;
+        $this->value = $this->dbObject[$this->param];
     }
 
     /**
@@ -229,7 +80,7 @@ class Field extends \samson\core\CompressableExternalModule implements \samson\c
      */
     public function value()
     {
-        return $this->value;
+        return $this->dbObject[$this->param];
     }
 
     /**
@@ -238,67 +89,9 @@ class Field extends \samson\core\CompressableExternalModule implements \samson\c
      * @param mixed $value Value to convert
      * @return int Converted value
      */
-    public function convert($value)
+    protected function convert($value)
     {
         return $value;
-    }
-
-    // Controller
-
-    /**
-     * Save handler for CMS Field input
-     */
-    public function __save()
-    {
-        // Does it necessary?
-        s()->async(true);
-
-        $dbObject = null;
-
-        // If we have post data
-        if (isset($_POST)) {
-            // Make pointers to posted parameters
-            $entity = & $_POST['__entity'];
-            $param 	= & $_POST['__param'];
-            $objectId = & $_POST['__obj_id'];
-            $value = & $_POST['__value'];
-
-            // Check if all nessesarly data is passed
-            if (!isset($value)) {
-                e('CMSField - no "value" is passed for saving', E_SAMSON_CORE_ERROR);
-            }
-            if (!isset($entity)) {
-                e('CMSField - no "entity" is passed for saving', E_SAMSON_CORE_ERROR);
-            }
-            if (!isset($objectId)) {
-                e('CMSField - no "object identifier" is passed for saving', E_SAMSON_CORE_ERROR);
-            }
-            if (!isset($param)) {
-                e('CMSField - no "object field name" is passed for saving', E_SAMSON_CORE_ERROR);
-            }
-
-            // Try to find passed object for saving
-            if (dbQuery($entity)->id($objectId)->first($dbObject)) {
-                // If object supports numeric value
-                if ($param != 'numeric_value' && isset($dbObject['numeric_value'])) {
-                    // Convert value to numeric value
-                    $dbObject['numeric_value'] = $this->convert($value);
-                }
-
-                // Set field value and than save it
-                $this->obj = $dbObject;
-                $this->param = $param;
-                $this->save($value);
-
-            } else {
-                // Generate error
-                e(
-                    'CMSField - Entity ## with id: ## - does not exists',
-                    E_SAMSON_CORE_ERROR,
-                    array($entity, $objectId)
-                );
-            }
-        }
     }
 
     /**
@@ -309,53 +102,49 @@ class Field extends \samson\core\CompressableExternalModule implements \samson\c
     public function save($value)
     {
         /** @var mixed $previousValue Previous instance value for transfer in event handlers */
-        $previousValue = $this->obj[$this->param];
+        $previousValue = $this->dbObject[$this->param];
 
         // Set field value
-        $this->obj[$this->param] = $value;
+        $this->dbObject[$this->param] = $this->convert($value);
 
         // Create new event on object updating
-        \samsonphp\event\Event::fire('samson.cms.input.change', array(& $this->obj, $this->param, $previousValue));
+        Event::fire('samson.cms.input.change', array(& $this->dbObject, $this->param, $previousValue));
 
         // Save object
-        $this->obj->save();
+        $this->dbObject->save();
     }
 
-    /** @see \samson\core\iModuleViewable::toView() */
-    public function toView($prefix = null, array $restricted = array())
+    /**
+     * Function to render inner object
+     *
+     * @param Application $renderer Renderer object
+     * @return string HTML string
+     */
+    protected function viewField($renderer)
     {
-        // Generate unique prefix if not passed
-        $innerPrefix = 'field_';
+        return $renderer->view($this->fieldView)
+            ->set('fieldId', 'field_' . $this->dbObject->id)
+            ->set('value', $this->value())
+            ->output();
+    }
 
-        // Result view collection
-        $result = array();
-
-    // 		// Get only this class properties
-    // 		$own = array_keys(get_object_vars($this));
-    // 		$parent = array_keys(get_object_vars(ns_classname('ExternalModule','samson\core')));
-    // 		$properties = array_diff($own, $parent);
-
-        // Iterate object vars and gather them in collection
-        foreach (get_object_vars($this) as $key => $value) {
-            $result[$innerPrefix.$key] = $value;
-        }
-
-        // Generate field action controller
-        $result[$innerPrefix.'action'] = url_build($this->id, $this->action);
-
-        // Generate unique textarea id
-        $result[$innerPrefix.'textarea_id'] = 'field_'.$this->obj->id;
-
-        // Render inner field view
-        $result[$innerPrefix.'view'] = $this->view($this->fieldView)->set($result)->output();
-
-        // Return input fields collection prepared for module view
-        return array(
-            $prefix.'html' => $this
-                ->view($this->defaultView)
-                ->set($result)
-                ->set($this->obj, 'object')
-            ->output()
-        );
+    /**
+     * Function to render class
+     *
+     * @param Application $renderer Renderer object
+     * @param string $saveHandler Save controller name
+     * @return string HTML string
+     */
+    public function view($renderer, $saveHandler = 'save')
+    {
+        return $renderer->view($this->defaultView)
+            ->set('cssClass', $this->cssClass)
+            ->set('value', $this->value())
+            ->set('action', url_build($renderer->id(), $saveHandler))
+            ->set('entity', $this->entity)
+            ->set('param', $this->param)
+            ->set('objectId', $this->dbObject->id)
+            ->set('view', $this->viewField($renderer))
+            ->output();
     }
 }
