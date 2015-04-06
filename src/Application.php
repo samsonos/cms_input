@@ -64,10 +64,9 @@ class Application extends \samson\core\CompressableExternalModule implements \sa
     /**
      * Save handler for CMS Field input
      */
-    public function __save()
+    public function __async_save()
     {
-        // Does it necessary?
-        s()->async(true);
+        $response = array('status' => 0);
 
         // If we have post data
         if (isset($_POST)) {
@@ -94,9 +93,12 @@ class Application extends \samson\core\CompressableExternalModule implements \sa
             // Create new Field instance
             $this->createField(new dbQuery(), $entity, $param, $identifier);
 
+            $response['status'] = 1;
             // Save specified value to SamsonCMS input
-            $this->field->save($value);
+            $this->field->save($value, $response);
         }
+
+        return $response;
     }
 
     /**
