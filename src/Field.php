@@ -99,7 +99,7 @@ class Field
      *
      * @param mixed $value Field value
      */
-    public function save($value, & $response)
+    public function save($value, & $response = null)
     {
         /** @var mixed $previousValue Previous instance value for transfer in event handlers */
         $previousValue = $this->dbObject[$this->param];
