@@ -99,7 +99,7 @@ class Field
      *
      * @param mixed $value Field value
      */
-    public function save($value)
+    public function save($value, & $response = null)
     {
         /** @var mixed $previousValue Previous instance value for transfer in event handlers */
         $previousValue = $this->dbObject[$this->param];
@@ -108,7 +108,7 @@ class Field
         $this->dbObject[$this->param] = $this->convert($value);
 
         // Create new event on object updating
-        Event::fire('samson.cms.input.change', array(& $this->dbObject, $this->param, $previousValue));
+        Event::fire('samson.cms.input.change', array(& $this->dbObject, $this->param, $previousValue, & $response));
 
         // Save object
         $this->dbObject->save();
