@@ -12,12 +12,7 @@
         }
     ],
     "require":{
-        "samsonos/js_core":"*",
-      "samsonos/cms_input_date":"*",
-      "samsonos/cms_input_datetime":"*",
-      "samsonos/cms_input_select":"*",
-      "samsonos/cms_input_upload":"*",
-      "samsonos/cms_input_wysiwyg":"*"
+        "samsonos/js_core":"*"
     },
     "license":"Open Software License (OSL) v 3.0",
     "homepage":"http://samsonos.com/",
