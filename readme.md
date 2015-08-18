@@ -56,4 +56,4 @@ This class implements \samson\core\iModuleViewable interface and should implemen
 Default there is default implementation in this module but it can be overridden in ancestor classes.
 
 
-(SamsonCMS official web-site)[samsoncms.com]
+[SamsonCMS official web-site](samsoncms.com)

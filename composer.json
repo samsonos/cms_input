@@ -12,7 +12,6 @@
         }
     ],
     "require":{
-        "samsonos/cms_app":"*",
         "samsonos/js_core":"*"
     },
     "license":"Open Software License (OSL) v 3.0",
