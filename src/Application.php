@@ -53,6 +53,7 @@ class Application extends \samson\core\CompressableExternalModule implements \sa
 
                 /** @var string $moduleId Module identifier */
                 if (($module = &m($moduleId)) !== null) {
+                    $module = $module->copy();
                     $module->createField($dbQuery, $entity, $param, $identifier);
                 }
             }
