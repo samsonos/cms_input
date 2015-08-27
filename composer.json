@@ -11,6 +11,7 @@
             "email":"omelchenko@samsonos.com"
         }
     ],
+    "minimum-stability":"dev",
     "require":{
         "samsonos/js_core":"*"
     },
