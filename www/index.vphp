@@ -5,5 +5,5 @@
 	<input type="hidden" name="__param" value="<?php iv('param')?>">
 	<input type="hidden" name="__obj_id" value="<?php iv('objectId')?>">
 	<input type="hidden" name="__empty_text" value="<?php t('Введите значение')?>">
-	<?php iv('view')?>
+	<?php iv('fieldView')?>
 </div>
