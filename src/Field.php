@@ -123,8 +123,8 @@ class Field
     protected function viewField($renderer)
     {
         return $renderer->view($this->fieldView)
-            ->set('fieldId', 'field_' . $this->dbObject->id)
-            ->set('value', $this->value())
+            ->set('field_' . $this->dbObject->id, 'fieldId')
+            ->set($this->value(), 'value')
             ->output();
     }
 
@@ -137,15 +137,17 @@ class Field
      */
     public function view($renderer, $saveHandler = 'save')
     {
+        // TODO: Context rewriting if in one chain!
+        $fieldView = $this->viewField($renderer);
         return $renderer->view($this->defaultView)
-            ->set('cssClass', $this->cssClass)
-            ->set('value', $this->value())
-            ->set('action', url_build(preg_replace('/(_\d+)/', '', $renderer->id()), $saveHandler))
-            ->set('entity', $this->entity)
-            ->set('param', $this->param)
-            ->set('objectId', $this->dbObject->id)
-            ->set('applicationId', $renderer->id())
-            ->set('fieldView', $this->viewField($renderer))
+            ->set($this->cssClass, 'cssClass')
+            ->set($this->value(), 'value')
+            ->set(url_build(preg_replace('/(_\d+)/', '', $renderer->id()), $saveHandler), 'action')
+            ->set($this->entity, 'entity')
+            ->set($this->param, 'param')
+            ->set($this->dbObject->id, 'objectId')
+            ->set($renderer->id(), 'applicationId')
+            ->set($fieldView, 'fieldView')
             ->output();
     }
 }
