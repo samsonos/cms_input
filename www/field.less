@@ -1,6 +1,12 @@
 /* Generic styles for input fields */
 .__inputfield 
 {
+  &.__textarea, &.__select  {
+    &:hover {
+      cursor: pointer;
+    }
+  }
+  
   position: relative;
   overflow: visible;
   min-height: 23px;
