@@ -6,12 +6,13 @@
 namespace samsoncms\input;
 
 use samson\activerecord\dbQuery;
+use samsonframework\core\RenderInterface;
 
 /**
  * SamsonCMS input module
  * @author Max Omelchenko <omelchenko@samsonos.com>
  */
-class Application extends \samson\core\CompressableExternalModule implements \samson\core\iModuleViewable
+class Application extends \samson\core\CompressableExternalModule implements RenderInterface
 {
     public static $type;
 
